@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import {
   resolveSlugFromHost,
@@ -70,10 +70,7 @@ export async function generateMetadata({
 
 export default async function TenantPage({ params }: { params: Params }) {
   const slug = await resolveSlug();
-  if (!slug) {
-    const { redirect } = await import("next/navigation");
-    redirect("http://212.47.70.100:8083");
-  }
+  if (!slug) redirect("http://212.47.70.100:8083");
 
   const site = await getSiteConfig(slug);
   if (!site) notFound();
