@@ -87,8 +87,10 @@ export default async function TenantPage({ params }: { params: Params }) {
 
   if (!page || page.isActive === false) notFound();
 
+  const rootProps = (page.content as Record<string, unknown> | null)?.root as { props?: Record<string, string> } | undefined;
+
   return (
-    <div style={themeStyle(site)}>
+    <div style={themeStyle(site, rootProps?.props)}>
       <Navbar site={site} />
       <main>
         <PageRenderer

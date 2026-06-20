@@ -46,7 +46,19 @@ export default function BuilderClient({
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const data = (initialData as unknown as Data) || EMPTY;
+  // Seed root.props from site theme vars so the color pickers start on the
+  // right values. Saved root.props (if any) take priority over site defaults.
+  const tv = themeVars as Record<string, string>;
+  const siteRootProps = {
+    primary:  tv["--site-primary"]  || "#00256f",
+    accent:   tv["--site-accent"]   || "#00256f",
+    footerBg: tv["--site-footer-bg"] || "#172554",
+  };
+  const savedRootProps = (initialData as Record<string, unknown> | null)?.root as Record<string, unknown> | undefined;
+  const mergedRoot = { props: { ...siteRootProps, ...((savedRootProps?.props as Record<string, unknown>) || {}) } };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: Data = { ...((initialData as unknown as Data) || EMPTY), root: mergedRoot as any };
+
   const tokenQ = token ? `?t=${encodeURIComponent(token)}` : "";
   const pageHref = (p: string) => `/builder/${slug}/${p}${tokenQ}`;
   // Ensure the current page is always selectable even if the list lags.
@@ -114,7 +126,7 @@ export default function BuilderClient({
   }
 
   return (
-    <div style={themeVars}>
+    <div>
       {/* Header */}
       <div className="flex items-center justify-between gap-4 bg-neutral-900 px-5 py-2.5 text-sm text-white">
         <div className="flex items-center gap-3">
@@ -196,7 +208,7 @@ export default function BuilderClient({
       </div>
 
       <BuilderDataProvider value={ctx}>
-        <Puck config={puckConfig} data={data} iframe={{ enabled: false }} onPublish={save} />
+        <Puck config={puckConfig} data={data} iframe={{ enabled: true }} onPublish={save} />
       </BuilderDataProvider>
     </div>
   );

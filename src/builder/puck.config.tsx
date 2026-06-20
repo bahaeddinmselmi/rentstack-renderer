@@ -3,6 +3,29 @@
 import type { Config } from "@puckeditor/core";
 import { renderBlock } from "@/blocks/registry";
 import { useBuilderData } from "./data";
+import type React from "react";
+
+// Inline color picker shown in Puck's field sidebar.
+const colorField = {
+  type: "custom" as const,
+  render: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <input
+        type="color"
+        value={value || "#00256f"}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: 40, height: 32, cursor: "pointer", border: "1px solid #d1d5db", borderRadius: 6, padding: 2 }}
+      />
+      <input
+        type="text"
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="#00256f"
+        style={{ flex: 1, padding: "4px 8px", border: "1px solid #d1d5db", borderRadius: 6, fontFamily: "monospace", fontSize: 13 }}
+      />
+    </div>
+  ),
+};
 
 // ═══════════════════════════════════════════════════════════════════
 // Puck config — field schemas for the builder palette. Crucially, every
@@ -29,6 +52,32 @@ const iconField = { type: "text" as const, label: "Icône (Material Symbols)" };
 
 // Typed loosely: each block validates its own props at render time.
 export const puckConfig: Config = {
+  // Root = site-wide settings panel. Colors stored here are applied as
+  // CSS vars wrapping the preview content; on publish they're saved in
+  // root.props of the Puck document and read back by the public renderer.
+  root: {
+    fields: {
+      primary:   { ...colorField, label: "Couleur principale" } as typeof colorField & { label: string },
+      accent:    { ...colorField, label: "Couleur accent" } as typeof colorField & { label: string },
+      footerBg:  { ...colorField, label: "Fond du footer" } as typeof colorField & { label: string },
+    },
+    defaultProps: {
+      primary:  "#00256f",
+      accent:   "#00256f",
+      footerBg: "#172554",
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    render: (({ children, primary, accent, footerBg }: { children: React.ReactNode; primary: string; accent: string; footerBg: string }) => (
+      <div style={{
+        "--site-primary": primary,
+        "--site-primary-dark": primary,
+        "--site-accent": accent,
+        "--site-footer-bg": footerBg,
+      } as React.CSSProperties}>
+        {children}
+      </div>
+    )) as any,
+  },
   components: {
     Hero: {
       label: "Hero",

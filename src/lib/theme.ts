@@ -14,7 +14,7 @@ function pick(t: ThemeColors, ...keys: string[]): string | undefined {
   return undefined;
 }
 
-export function themeStyle(site: SiteConfig): React.CSSProperties {
+export function themeStyle(site: SiteConfig, rootProps?: Record<string, string>): React.CSSProperties {
   const t = site.themeColors || {};
   const primary = pick(t, "primary") || "#00256f";
   const primaryDark =
@@ -27,12 +27,10 @@ export function themeStyle(site: SiteConfig): React.CSSProperties {
     "#92abff";
 
   return {
-    // typed as a CSS-variable bag — matches the legacy sites' token names
-    // so harvested blocks work unchanged.
-    ["--site-primary" as string]: primary,
-    ["--site-primary-dark" as string]: primaryDark,
-    ["--site-accent" as string]: accent,
-    ["--site-footer-bg" as string]: footerBg,
-    ["--site-icon-tint" as string]: iconTint,
+    ["--site-primary" as string]:      rootProps?.primary  || primary,
+    ["--site-primary-dark" as string]: rootProps?.primary  || primaryDark,
+    ["--site-accent" as string]:       rootProps?.accent   || accent,
+    ["--site-footer-bg" as string]:    rootProps?.footerBg || footerBg,
+    ["--site-icon-tint" as string]:    iconTint,
   };
 }
