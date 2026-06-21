@@ -27,6 +27,23 @@ const colorField = {
   ),
 };
 
+const GOOGLE_FONT_URLS: Record<string, string> = {
+  Manrope:    "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap",
+  Inter:      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+  Poppins:    "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap",
+  Montserrat: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap",
+  Raleway:    "https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&display=swap",
+  "DM Sans":  "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap",
+};
+
+const RADIUS_MAP: Record<string, string> = {
+  none: "0px",
+  sm:   "6px",
+  md:   "12px",
+  lg:   "16px",
+  full: "9999px",
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // Puck config — field schemas for the builder palette. Crucially, every
 // component's `render` delegates to the SAME `renderBlock` the public
@@ -57,26 +74,84 @@ export const puckConfig: Config = {
   // root.props of the Puck document and read back by the public renderer.
   root: {
     fields: {
-      primary:   { ...colorField, label: "Couleur principale" } as typeof colorField & { label: string },
-      accent:    { ...colorField, label: "Couleur accent" } as typeof colorField & { label: string },
-      footerBg:  { ...colorField, label: "Fond du footer" } as typeof colorField & { label: string },
+      // ── Colors ──────────────────────────────────────────────────
+      primary:     { ...colorField, label: "Couleur principale" } as typeof colorField & { label: string },
+      accent:      { ...colorField, label: "Couleur accent" } as typeof colorField & { label: string },
+      footerBg:    { ...colorField, label: "Fond du footer" } as typeof colorField & { label: string },
+      iconTint:    { ...colorField, label: "Icônes / badges" } as typeof colorField & { label: string },
+      cardBg:      { ...colorField, label: "Fond des cartes" } as typeof colorField & { label: string },
+      buttonText:  { ...colorField, label: "Texte des boutons" } as typeof colorField & { label: string },
+      // ── Shape ───────────────────────────────────────────────────
+      buttonRadius: {
+        type: "select",
+        label: "Arrondi des boutons",
+        options: [
+          { label: "Aucun", value: "none" },
+          { label: "Petit", value: "sm" },
+          { label: "Moyen", value: "md" },
+          { label: "Grand", value: "lg" },
+          { label: "Pilule", value: "full" },
+        ],
+      },
+      // ── Typography ──────────────────────────────────────────────
+      fontFamily: {
+        type: "select",
+        label: "Police de caractères",
+        options: [
+          { label: "Manrope (défaut)", value: "Manrope" },
+          { label: "Inter", value: "Inter" },
+          { label: "Poppins", value: "Poppins" },
+          { label: "Montserrat", value: "Montserrat" },
+          { label: "Raleway", value: "Raleway" },
+          { label: "DM Sans", value: "DM Sans" },
+        ],
+      },
+      // ── SEO ─────────────────────────────────────────────────────
+      metaTitle: { type: "text", label: "Titre SEO (balise title)" },
+      metaDescription: { type: "textarea", label: "Méta-description" },
     },
     defaultProps: {
-      primary:  "#00256f",
-      accent:   "#00256f",
-      footerBg: "#172554",
+      primary:      "#00256f",
+      accent:       "#00256f",
+      footerBg:     "#172554",
+      iconTint:     "#92abff",
+      cardBg:       "#f8faff",
+      buttonText:   "#ffffff",
+      buttonRadius: "md",
+      fontFamily:   "Manrope",
+      metaTitle:    "",
+      metaDescription: "",
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    render: (({ children, primary, accent, footerBg }: { children: React.ReactNode; primary: string; accent: string; footerBg: string }) => (
-      <div style={{
-        "--site-primary": primary,
-        "--site-primary-dark": primary,
-        "--site-accent": accent,
-        "--site-footer-bg": footerBg,
-      } as React.CSSProperties}>
-        {children}
-      </div>
-    )) as any,
+    render: (({
+      children,
+      primary, accent, footerBg, iconTint, cardBg, buttonText, buttonRadius, fontFamily,
+    }: {
+      children: React.ReactNode;
+      primary: string; accent: string; footerBg: string;
+      iconTint: string; cardBg: string; buttonText: string;
+      buttonRadius: string; fontFamily: string;
+    }) => {
+      const fontUrl = GOOGLE_FONT_URLS[fontFamily] || GOOGLE_FONT_URLS["Manrope"];
+      const radius = RADIUS_MAP[buttonRadius] || "12px";
+      return (
+        <div style={{
+          "--site-primary":      primary,
+          "--site-primary-dark": primary,
+          "--site-accent":       accent,
+          "--site-footer-bg":    footerBg,
+          "--site-icon-tint":    iconTint,
+          "--site-card-bg":      cardBg,
+          "--site-button-text":  buttonText,
+          "--site-radius":       radius,
+          "--font-headline":     `"${fontFamily}", sans-serif`,
+          "--font-body":         `"${fontFamily}", sans-serif`,
+        } as React.CSSProperties}>
+          <style>{`@import url('${fontUrl}');`}</style>
+          {children}
+        </div>
+      );
+    }) as any,
   },
   components: {
     Hero: {
@@ -114,7 +189,6 @@ export const puckConfig: Config = {
           getItemSummary: (i: { value?: string }) => i.value || "Lieu" },
       },
       defaultProps: { defaultLocation: "Aéroport Tunis-Carthage", actionHref: "/nos-voitures", overlap: false, locations: [] },
-      // locations is array of {value}; flatten before render.
       render: (props) => {
         const locs = Array.isArray(props.locations)
           ? (props.locations as Array<{ value?: string }>).map((x) => x.value).filter(Boolean)
@@ -256,6 +330,101 @@ export const puckConfig: Config = {
       },
       defaultProps: { image: "https://images.unsplash.com/photo-1549924231-f129b911e442?w=1600&q=80", heading: "Titre", subtitle: "Sous-titre", ctaLabel: "Découvrir", ctaHref: "#", height: "md" },
       render: r("ImageBanner"),
+    },
+
+    // ── New blocks ────────────────────────────────────────────────
+
+    WhatsAppCTA: {
+      label: "WhatsApp CTA",
+      fields: {
+        label:         { type: "text",     label: "Texte du bouton" },
+        message:       { type: "textarea", label: "Message pré-rempli" },
+        phoneOverride: { type: "text",     label: "Numéro (laisser vide → utilise celui du site)" },
+      },
+      defaultProps: {
+        label:         "Réserver via WhatsApp",
+        message:       "Bonjour, je souhaite louer une voiture.",
+        phoneOverride: "",
+      },
+      render: r("WhatsAppCTA"),
+    },
+
+    PricingTable: {
+      label: "Pricing table",
+      fields: {
+        title:    { type: "text",     label: "Titre" },
+        subtitle: { type: "textarea", label: "Sous-titre" },
+        currency: { type: "text",     label: "Devise (ex: DT, €, $)" },
+        plans: {
+          type: "array",
+          arrayFields: {
+            label:        { type: "text",   label: "Nom du véhicule / catégorie" },
+            pricePerDay:  { type: "text",   label: "Prix / jour" },
+            pricePerWeek: { type: "text",   label: "Prix / semaine" },
+            pricePerMonth:{ type: "text",   label: "Prix / mois" },
+            tag:          { type: "text",   label: "Badge (ex: Populaire)" },
+            highlighted:  { type: "radio",  label: "Mettre en avant", options: [
+              { label: "Oui", value: true },
+              { label: "Non", value: false },
+            ] },
+          },
+          getItemSummary: (i: { label?: string }) => i.label || "Formule",
+        },
+      },
+      defaultProps: {
+        title:    "Nos Tarifs",
+        subtitle: "Transparents et sans surprise",
+        currency: "DT",
+        plans: [
+          { label: "Citadine",    pricePerDay: "39",  pricePerWeek: "220", pricePerMonth: "750",  tag: "",         highlighted: false },
+          { label: "Berline",     pricePerDay: "59",  pricePerWeek: "330", pricePerMonth: "1100", tag: "Populaire", highlighted: true },
+          { label: "SUV / 4x4",  pricePerDay: "89",  pricePerWeek: "490", pricePerMonth: "1600", tag: "",         highlighted: false },
+        ],
+      },
+      render: r("PricingTable"),
+    },
+
+    GoogleMap: {
+      label: "Google Map",
+      fields: {
+        title:   { type: "text",   label: "Titre de la section" },
+        address: { type: "text",   label: "Adresse (texte)" },
+        lat:     { type: "text",   label: "Latitude" },
+        lng:     { type: "text",   label: "Longitude" },
+        zoom:    { type: "number", label: "Zoom (1-18)" },
+        height:  { type: "select", label: "Hauteur", options: [
+          { label: "Petite (280px)", value: "sm" },
+          { label: "Moyenne (400px)", value: "md" },
+          { label: "Grande (520px)", value: "lg" },
+        ] },
+      },
+      defaultProps: {
+        title:   "Notre localisation",
+        address: "Tunis, Tunisie",
+        lat:     "36.8065",
+        lng:     "10.1815",
+        zoom:    14,
+        height:  "md",
+      },
+      render: r("GoogleMap"),
+    },
+
+    VideoEmbed: {
+      label: "Vidéo (YouTube / TikTok)",
+      fields: {
+        url:         { type: "text",   label: "URL YouTube ou TikTok" },
+        title:       { type: "text",   label: "Titre (optionnel)" },
+        aspectRatio: { type: "select", label: "Format", options: [
+          { label: "Paysage 16:9", value: "16:9" },
+          { label: "Portrait 9:16 (TikTok)", value: "9:16" },
+        ] },
+      },
+      defaultProps: {
+        url:         "",
+        title:       "",
+        aspectRatio: "16:9",
+      },
+      render: r("VideoEmbed"),
     },
   },
 };

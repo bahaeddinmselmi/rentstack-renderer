@@ -11,6 +11,10 @@ import AirportDelivery from "./AirportDelivery";
 import CityLinks from "./CityLinks";
 import RichText from "./RichText";
 import ImageBanner from "./ImageBanner";
+import WhatsAppCTA from "./WhatsAppCTA";
+import PricingTable from "./PricingTable";
+import GoogleMap from "./GoogleMap";
+import VideoEmbed from "./VideoEmbed";
 import type { RenderContext } from "./context";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -45,6 +49,10 @@ const REGISTRY: Record<string, BlockComponent> = {
   CityLinks: CityLinks as unknown as BlockComponent,
   RichText: RichText as unknown as BlockComponent,
   ImageBanner: ImageBanner as unknown as BlockComponent,
+  WhatsAppCTA: WhatsAppCTA as unknown as BlockComponent,
+  PricingTable: PricingTable as unknown as BlockComponent,
+  GoogleMap: GoogleMap as unknown as BlockComponent,
+  VideoEmbed: VideoEmbed as unknown as BlockComponent,
 };
 
 /** Block types the builder palette can offer (Phase 2). */

@@ -51,9 +51,13 @@ export interface SiteConfig {
   ogImage?: string | null;
   baseUrl?: string | null;
   themeColors?: ThemeColors | null;
+  // Address
+  addressCity?: string | null;
   // SEO
   seoTitleDefault?: string | null;
   seoDescription?: string | null;
+  // site_settings merged by category (navbar, footer, fonts, etc.)
+  config?: Record<string, unknown> | null;
   // pass-through for everything else
   [key: string]: unknown;
 }
